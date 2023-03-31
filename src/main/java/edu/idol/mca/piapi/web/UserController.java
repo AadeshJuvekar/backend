@@ -226,9 +226,9 @@ public class UserController {
 	 * This method is used to update task status with for given task identifier and
 	 * developer loginName
 	 * 
-	 * @param taskId
-	 * @param developerLoginName
-	 * @param task
+	 * @param taskIdentifier
+	 * @param loginName
+	 * @param progress
 	 * @param session
 	 * @return Response Entity with updated task status if developer is logged in
 	 *         else You do not have Access message is appeared with Http Status
@@ -250,8 +250,8 @@ public class UserController {
 	 * 
 	 * @param task
 	 * @param result
-	 * @param productOwnerLoginName
-	 * @param teamleaderLoginName
+	 * @param ownerLoginName
+	 * @param leaderLoginName
 	 * @param session
 	 * @return Response Entity of new created task on basis of ProductOwner
 	 *         LoginName and TeamLeader LoginName with HttpStatus
@@ -346,7 +346,7 @@ public class UserController {
 	/**
 	 * This method is used to delete task based on Task identifier
 	 * 
-	 * @param taskID
+	 * @param taskIdentifier
 	 * @param session
 	 * @return Response Entity with Deleted Task given by task identifier Team
 	 *         Leader is logged in else You do not have Access message is appeared
@@ -386,7 +386,7 @@ public class UserController {
 	 * This method is method is used to assign task to developer
 	 * 
 	 * @param taskIdentifier
-	 * @param devLoginName
+	 * @param loginName
 	 * @param session
 	 * @return Resposne Entity with Task assigned to developer if Team Leader is
 	 *         logged in else You do not have Access message is appeared with
@@ -406,7 +406,7 @@ public class UserController {
 	 * This controller is used for calling add remark method from client service.
 	 * Will also be used for retrieving all the errors from input remark object.
 	 * @param remark is the object of Remark to be saved
-	 * @param task_id is the unique task identifier.
+	 * @param taskIdentifier is the unique task identifier.
 	 * @return saved remark if no errors found or map of the errors found in the input remark object.
 	 */	
 	@PostMapping("/addRemark/{taskIdentifier}")
@@ -424,8 +424,8 @@ public class UserController {
 	/**
 	 * This controller is used for calling add remark method from client service.
 	 * Will also be used for retrieving all the errors from input remark object.
-	 * @param remark is the object of Remark to be saved
-	 * @param task_id is the unique task identifier.
+	 * @param remarkIdentifier is the object of Remark to be saved
+	 * @param taskIdentifier is the unique task identifier.
 	 * @return saved remark if no errors found or map of the errors found in the input remark object.
 	 */	
 	@DeleteMapping("/remark/{taskIdentifier}/{remarkIdentifier}")
