@@ -34,7 +34,7 @@ public class Remark {
 	/**
 	 * Remark Identifier given as a remark. It cannot be blank
 	 */
-	@NotBlank(message = "Remark Identifier is required")
+//	@NotBlank(message = "Remark Identifier is required")
 	@Column(unique=true, updatable=false)
 	@Size(min=2, max=4, message = "Please enter valid task indentifier size(min=2 and max=4)")
 	private String remarkIdentifier;

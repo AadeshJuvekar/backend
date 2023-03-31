@@ -26,4 +26,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	 * This method will return all task available
 	 */
 	List<Task> findAll();
+	
+	
 }
+
