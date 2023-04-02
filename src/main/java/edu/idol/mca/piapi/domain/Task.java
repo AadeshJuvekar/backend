@@ -199,6 +199,7 @@ public class Task {
 	public void removeUser(User user) {
 		this.users.remove(user);
 		user.getAssignedTasks().remove(this);
+
 	}
 	public void addRemark(Remark remark) {
 		this.remarks.add(remark);
