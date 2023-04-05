@@ -202,11 +202,11 @@ public class UserServiceImpl implements UserService {
 			throw new TaskIdException("Task with Identifier " + taskIdentifier.toUpperCase() + " doesn't exist");
 		}
 		Set<User> users = task.getUsers();
-		ArrayList<User> list = new ArrayList<>();
+		ArrayList<User> userlist = new ArrayList<>();
 		for (User user : users) {
-			list.add(user);
+			userlist.add(user);
 		}
-		for (User user : list) {
+		for (User user : userlist) {
 			task.removeUser(user);
 			updateUser(user);
 			log.info(user.getLoginName());
