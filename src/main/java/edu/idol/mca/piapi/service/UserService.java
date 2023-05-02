@@ -135,6 +135,9 @@ public interface UserService {
 	 * @return the saved Remark Object
 	 */
 	public Task addRemark(Remark remark, String taskIdentifier);
+	
 	public void removeRemark(String remarkIdentifier, String taskIdentifier);
+	
+	public User getDeveloperByTaskIdentifier(String taskIdentifier, HttpSession session);
 
 }

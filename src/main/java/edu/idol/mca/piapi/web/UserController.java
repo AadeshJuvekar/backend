@@ -30,45 +30,45 @@ import edu.idol.mca.piapi.service.UserService;
 import edu.idol.mca.piapi.serviceImpl.MapValidationErrorService;
 
 /**
- *User Controller is used to handle the requests and responses
+ * User Controller is used to handle the requests and responses
  */
 @RestController
 @RequestMapping("/api")
 public class UserController {
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private MapValidationErrorService errorService;
 
-		/* |-------------------------------------------------| LOGIN AUTHENTICATION |--------------------------------------------------------------| */
-	
-	/**
-		 * Method for handling user login and creating session.
-		 * 
-		 * @param user
-		 * @param result       contains the result and error of validation
-		 * @param session      Creates New Session
-		 * @return Response Entity with logged In user with HTTP Status
-		 */
-		@PostMapping("/login")
-		public ResponseEntity<?> handleUserLogin(@RequestBody User user, BindingResult result,
-				HttpSession session) {
-			ResponseEntity<?> errorMap = errorService.mapValidationError(result);
-			if (errorMap != null) {
-				return errorMap;
-			}
-			//User loggedInOwner = 
-					userService.authenticateUser(user.getLoginName(),
-					user.getPwd(), session);
-			//return new ResponseEntity<User>(loggedInUser, HttpStatus.OK);
-			return new ResponseEntity<String>("Login Successful", HttpStatus.OK);
-		}
+	/*
+	 * |----------------| LOGIN AUTHENTICATION |----------------|
+	 */
 
+	/**
+	 * Method for handling user login and creating session.
+	 * 
+	 * @param user
+	 * @param result  contains the result and error of validation
+	 * @param session Creates New Session
+	 * @return Response Entity with logged In user with HTTP Status
+	 */
+	@PostMapping("/login")
+	public ResponseEntity<?> handleUserLogin(@RequestBody User user, BindingResult result, HttpSession session) {
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
+		// User loggedInOwner =
+		userService.authenticateUser(user.getLoginName(), user.getPwd(), session);
+		// return new ResponseEntity<User>(loggedInUser, HttpStatus.OK);
+		return new ResponseEntity<String>("Login Successful", HttpStatus.OK);
+	}
 
 	/**
 	 * Method for logging out User and terminating existing session.
+	 * 
 	 * @param session get current session details
 	 * @return Logout Success message
 	 */
@@ -78,7 +78,6 @@ public class UserController {
 		return new ResponseEntity<String>("Logout Successful", HttpStatus.OK);
 	}
 
-	
 	/**
 	 * Method for getting Session Information.
 	 * 
@@ -88,61 +87,65 @@ public class UserController {
 
 	@GetMapping("/getSession")
 	public ResponseEntity<?> getUserSesssion(HttpSession session) {
-		
+
 		HashMap<String, String> sessionMap = new HashMap<>();
-		if(session.getAttribute("userType") != null) {			
+		if (session.getAttribute("userType") != null) {
 			sessionMap.put("authType", "loggedIn");
 			sessionMap.put("userType", (String) session.getAttribute("userType"));
-			sessionMap.put("loginName", (String) session.getAttribute("loginName"));			
-			return new ResponseEntity<HashMap<String, String>>(sessionMap, HttpStatus.OK);	
-		}
-		else{
+			sessionMap.put("loginName", (String) session.getAttribute("loginName"));
+			return new ResponseEntity<HashMap<String, String>>(sessionMap, HttpStatus.OK);
+		} else {
 			sessionMap.put("authType", "notLoggedIn");
 			sessionMap.put("userType", "notLoggedIn");
-			sessionMap.put("loginName","notLoggedIn");
+			sessionMap.put("loginName", "notLoggedIn");
 			return new ResponseEntity<HashMap<String, String>>(sessionMap, HttpStatus.OK);
 		}
 
 	}
-	
-	/* |---------------------------------------------| USER CRUD OPERATIONS |----------------------------------------------------------| */
 
+	/*
+	 * |----------------| USER CRUD OPERATIONS |----------------|
+	 */
 
 	/**
 	 * Method for Registration of new user and storing data to database.
-	 * @param user Data collected to save
+	 * 
+	 * @param user   Data collected to save
 	 * @param result contains the result and errors of validation
 	 * @return saved user in database
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody User user, BindingResult result){
+	public ResponseEntity<?> registerUser(@Valid @RequestBody User user, BindingResult result) {
 		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
-		if(errorMap!=null) return errorMap;
-		User savedUser= userService.saveUser(user);
+		if (errorMap != null)
+			return errorMap;
+		User savedUser = userService.saveUser(user);
 
-		//return new ResponseEntity<User>(savedUser,HttpStatus.OK);
-		return new ResponseEntity<String>("Registration Successful",HttpStatus.OK);
+		// return new ResponseEntity<User>(savedUser,HttpStatus.OK);
+		return new ResponseEntity<String>("Registration Successful", HttpStatus.OK);
 	}
-	
-	
+
 	/**
 	 * Method for updating user in database.
-	 * @param user Data collected to update
+	 * 
+	 * @param user   Data collected to update
 	 * @param result contains the result and errors of validation
 	 * @return saved user in database
 	 */
 	@PatchMapping("/update")
-	public ResponseEntity<?> updateUser(@Valid @RequestBody User user,HttpSession session, BindingResult result){
+	public ResponseEntity<?> updateUser(@Valid @RequestBody User user, HttpSession session, BindingResult result) {
 		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
-		if(errorMap!=null) return errorMap;		
-		if(session.getAttribute("loginName")!=null && session.getAttribute("loginName").equals(user.getLoginName())) {
-			User savedUser= userService.updateUser(user);
-			return new ResponseEntity<User>(savedUser,HttpStatus.OK);
+		if (errorMap != null)
+			return errorMap;
+		if (session.getAttribute("loginName") != null
+				&& session.getAttribute("loginName").equals(user.getLoginName())) {
+			User savedUser = userService.updateUser(user);
+			return new ResponseEntity<User>(savedUser, HttpStatus.OK);
 		}
-		return new ResponseEntity<String>("You do not have access !!!",HttpStatus.UNAUTHORIZED);
-		
+		return new ResponseEntity<String>("You do not have access !!!", HttpStatus.UNAUTHORIZED);
+
 	}
-	
+
 	/**
 	 * Method to delete user by loginName
 	 * 
@@ -152,15 +155,15 @@ public class UserController {
 	@DeleteMapping("/{loginName}")
 	public ResponseEntity<?> deleteUser(@PathVariable String loginName, HttpSession session) {
 		if (session.getAttribute("loginName") != null && session.getAttribute("loginName").equals(loginName)) {
-		
-		userService.deleteUserByLoginName(loginName);
-		handleUserLogout(session);
-		return new ResponseEntity<String>("User with loginName :" + loginName + " is deleted", HttpStatus.OK);
+
+			userService.deleteUserByLoginName(loginName);
+			handleUserLogout(session);
+			return new ResponseEntity<String>("User with loginName :" + loginName + " is deleted", HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
-		//return new ResponseEntity<String>(loginName, HttpStatus.UNAUTHORIZED);
+		// return new ResponseEntity<String>(loginName, HttpStatus.UNAUTHORIZED);
 	}
-	
+
 	@GetMapping("/{loginName}")
 	public ResponseEntity<?> getUser(@PathVariable String loginName, HttpSession session) {
 		if (session.getAttribute("loginName") != null && session.getAttribute("loginName").equals(loginName)) {
@@ -178,26 +181,31 @@ public class UserController {
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-	
-	/* |-------------------------------------------------| PRODUCT OWNER USERTYPE |--------------------------------------------------------------| */
+
+	/*
+	 * |-------------------------------------------------| PRODUCT OWNER USERTYPE
+	 * |--------------------------------------------------------------|
+	 */
 
 	/**
 	 * Method to get all tasks
+	 * 
 	 * @return list of users
 	 */
 
 	@GetMapping("/all/{userType}")
-	public ResponseEntity<?> getUsersByType(@PathVariable String userType,HttpSession session) {
+	public ResponseEntity<?> getUsersByType(@PathVariable String userType, HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
-			String first= userType.substring(0,1);
-			first=first.toUpperCase();
-			String others= userType.substring(1,userType.length());
-			userType= first+others;		
+			String first = userType.substring(0, 1);
+			first = first.toUpperCase();
+			String others = userType.substring(1, userType.length());
+			userType = first + others;
 			List<User> users = userService.getAllUsersByUserType(userType);
 			return new ResponseEntity<List<User>>(users, HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
+
 	/**
 	 * Method to authorize client to view task
 	 * 
@@ -212,16 +220,17 @@ public class UserController {
 		if (session.getAttribute("userType") != null) {
 
 			User client = userService.addUser(taskIdentifier.toUpperCase(), loginName);
-			return new ResponseEntity<String>("User "+ client.getLoginName() +" authorised to view task", HttpStatus.OK);
+			return new ResponseEntity<String>("User " + client.getLoginName() + " authorised to view task",
+					HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 
 	}
-	
-	
 
-
-	/* |-------------------------------------------------| DEVELOPER USERTYPE |--------------------------------------------------------------| */
+	/*
+	 * |-------------------------------------------------| DEVELOPER USERTYPE
+	 * |--------------------------------------------------------------|
+	 */
 	/**
 	 * This method is used to update task status with for given task identifier and
 	 * developer loginName
@@ -234,7 +243,8 @@ public class UserController {
 	 *         else You do not have Access message is appeared with Http Status
 	 */
 	@PatchMapping("/task/updatestatus/{loginName}/{taskIdentifier}/{progress}")
-	public ResponseEntity<?> updateTaskStatus(@PathVariable String taskIdentifier, @PathVariable String loginName,  @PathVariable String progress, HttpSession session) {
+	public ResponseEntity<?> updateTaskStatus(@PathVariable String taskIdentifier, @PathVariable String loginName,
+			@PathVariable String progress, HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
 			Task updatedTask = userService.updateTaskStatus(taskIdentifier, loginName, progress);
 			return new ResponseEntity<Task>(updatedTask, HttpStatus.OK);
@@ -242,7 +252,10 @@ public class UserController {
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
 
-	/* |-------------------------------------------------| TEAMLEADER USERTYPE |--------------------------------------------------------------| */
+	/*
+	 * |-------------------------------------------------| TEAMLEADER USERTYPE
+	 * |--------------------------------------------------------------|
+	 */
 
 	/**
 	 * This method is used to create a task into the DataBase Task is created on the
@@ -277,15 +290,15 @@ public class UserController {
 	@GetMapping("/tasks")
 	public ResponseEntity<?> getTasks(HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
-			List<Task> tasks=new ArrayList<>();
-			if((tasks= userService.getAllTasks(session)) != null){
-			return new ResponseEntity<List<Task>>(tasks, HttpStatus.OK);
+			List<Task> tasks = new ArrayList<>();
+			if ((tasks = userService.getAllTasks(session)) != null) {
+				return new ResponseEntity<List<Task>>(tasks, HttpStatus.OK);
 			}
 			return new ResponseEntity<String>("Tasks not found.", HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-	
+
 	/**
 	 * Method to find the Task by taskIdentifier
 	 * 
@@ -296,14 +309,14 @@ public class UserController {
 	public ResponseEntity<?> getTaskByTaskIdentifier(@PathVariable String taskIdentifier, HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
 			Task task;
-			if((task= userService.getTaskByTaskIdentifier(taskIdentifier.toUpperCase(), session))!=null) {
+			if ((task = userService.getTaskByTaskIdentifier(taskIdentifier.toUpperCase(), session)) != null) {
 				return new ResponseEntity<Task>(task, HttpStatus.OK);
 			}
-			return new ResponseEntity<String>("Task with id: "+taskIdentifier+" not found.", HttpStatus.OK);
+			return new ResponseEntity<String>("Task with id: " + taskIdentifier + " not found.", HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-	
+
 	/*---------------------------------------------------- | User Task Lists | -----------------------------------------------------------------*/
 	/**
 	 * Method to get list of all tasks
@@ -311,19 +324,16 @@ public class UserController {
 	 * @return list of all task list
 	 */
 	@GetMapping("/tasks/{loginName}")
-	public ResponseEntity<?> getUserTasks(@PathVariable String loginName,HttpSession session) {
+	public ResponseEntity<?> getUserTasks(@PathVariable String loginName, HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
-			Set<Task> tasks=new HashSet<>();
-			if((tasks= userService.getUserTasks(loginName)) != null){
-			return new ResponseEntity<Set<Task>>(tasks, HttpStatus.OK);
-			}
-			else return new ResponseEntity<String>("Tasks not found.", HttpStatus.OK);
+			Set<Task> tasks = new HashSet<>();
+			if ((tasks = userService.getUserTasks(loginName)) != null) {
+				return new ResponseEntity<Set<Task>>(tasks, HttpStatus.OK);
+			} else
+				return new ResponseEntity<String>("Tasks not found.", HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-
-
-	
 
 	/**
 	 * Method to find the Task by taskIdentifier assigned to user
@@ -332,17 +342,18 @@ public class UserController {
 	 * @return task if found
 	 */
 	@GetMapping("/task/{loginName}/{taskIdentifier}")
-	public ResponseEntity<?> getTaskByTaskIdentifier(@PathVariable String loginName,@PathVariable String taskIdentifier, HttpSession session) {
+	public ResponseEntity<?> getTaskByTaskIdentifier(@PathVariable String loginName,
+			@PathVariable String taskIdentifier, HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
 			Task task;
-			if((task= userService.getTaskByTaskIdentifier(taskIdentifier.toUpperCase(), session))!=null) {
+			if ((task = userService.getTaskByTaskIdentifier(taskIdentifier.toUpperCase(), session)) != null) {
 				return new ResponseEntity<Task>(task, HttpStatus.OK);
 			}
-			return new ResponseEntity<String>("Task with id: "+taskIdentifier+" not found.", HttpStatus.OK);
+			return new ResponseEntity<String>("Task with id: " + taskIdentifier + " not found.", HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-	
+
 	/**
 	 * This method is used to delete task based on Task identifier
 	 * 
@@ -356,22 +367,22 @@ public class UserController {
 	public ResponseEntity<?> deleteTask(@PathVariable String taskIdentifier, HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
 			userService.deleteTask(taskIdentifier);
-			return new ResponseEntity<String>("Task with Identifier " + taskIdentifier.toUpperCase() + " deleted successfully",
-					HttpStatus.OK);
+			return new ResponseEntity<String>(
+					"Task with Identifier " + taskIdentifier.toUpperCase() + " deleted successfully", HttpStatus.OK);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-	
+
 	/**
 	 * This method is used to update task if teamleader is loged in
+	 * 
 	 * @param task
 	 * @param result
 	 * @param session
 	 * @return updated task if executed successfully
 	 */
 	@PatchMapping("/task/update/{taskIdentifier}")
-	public ResponseEntity<?> updateTask(@Valid @RequestBody Task task, BindingResult result,
-			HttpSession session) {
+	public ResponseEntity<?> updateTask(@Valid @RequestBody Task task, BindingResult result, HttpSession session) {
 		if (session.getAttribute("loginName") != null) {
 			ResponseEntity<?> errorMap = errorService.mapValidationError(result);
 			if (errorMap != null)
@@ -381,7 +392,7 @@ public class UserController {
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-	
+
 	/**
 	 * This method is method is used to assign task to developer
 	 * 
@@ -393,54 +404,82 @@ public class UserController {
 	 *         HttpStatus
 	 */
 	@PatchMapping("/task/assignDeveloper/{taskIdentifier}/{loginName}")
-	public ResponseEntity<?> assignDeveloperToTask(@PathVariable String taskIdentifier,
-			@PathVariable String loginName, HttpSession session) {
+	public ResponseEntity<?> assignDeveloperToTask(@PathVariable String taskIdentifier, @PathVariable String loginName,
+			HttpSession session) {
 		if (session.getAttribute("userType") != null) {
 			Task savedTask = userService.assignDeveloper(taskIdentifier, loginName);
 			return new ResponseEntity<Task>(savedTask, HttpStatus.CREATED);
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
-	/* |-------------------------------------------------| CLIENT USERTYPE |--------------------------------------------------------------| */
+
+	/**
+	 * Method to find the assigned Developer by taskIdentifier
+	 * 
+	 * @param taskIdentifier
+	 * @return assigned developer if found
+	 */
+	@GetMapping("/task/developer/{taskIdentifier}")
+	public ResponseEntity<?> getDeveloperByTaskIdentifier(@PathVariable String taskIdentifier, HttpSession session) {
+		if (session.getAttribute("loginName") != null) {
+			User assignedDeveloper;
+			if ((assignedDeveloper = userService.getDeveloperByTaskIdentifier(taskIdentifier.toUpperCase(), session)) != null) {
+				return new ResponseEntity<User>(assignedDeveloper, HttpStatus.OK);
+			}
+			return new ResponseEntity<String>("No developer assigned to Task with id: " + taskIdentifier + ".", HttpStatus.OK);
+		}
+		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
+	}
+
+	/*
+	 * |-------------------------------------------------| CLIENT USERTYPE
+	 * |--------------------------------------------------------------|
+	 */
 	/**
 	 * This controller is used for calling add remark method from client service.
 	 * Will also be used for retrieving all the errors from input remark object.
-	 * @param remark is the object of Remark to be saved
+	 * 
+	 * @param remark         is the object of Remark to be saved
 	 * @param taskIdentifier is the unique task identifier.
-	 * @return saved remark if no errors found or map of the errors found in the input remark object.
-	 */	
+	 * @return saved remark if no errors found or map of the errors found in the
+	 *         input remark object.
+	 */
 	@PostMapping("/addRemark/{taskIdentifier}")
-		public ResponseEntity<?> addRemark(@Valid @RequestBody Remark remark, BindingResult bindingResult,@PathVariable String taskIdentifier, HttpSession session){
-			if (session.getAttribute("loginName") != null) {
-				remark.setGivenBy((String)session.getAttribute("loginName"));
-				ResponseEntity<?> errorMap = errorService.mapValidationError(bindingResult);
-				if(errorMap!=null) return errorMap;
-				
-				Task task = userService.addRemark(remark,taskIdentifier);
-				return new ResponseEntity<Task>(task,HttpStatus.OK);
-			}
-			return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
+	public ResponseEntity<?> addRemark(@Valid @RequestBody Remark remark, BindingResult bindingResult,
+			@PathVariable String taskIdentifier, HttpSession session) {
+		if (session.getAttribute("loginName") != null) {
+			remark.setGivenBy((String) session.getAttribute("loginName"));
+			ResponseEntity<?> errorMap = errorService.mapValidationError(bindingResult);
+			if (errorMap != null)
+				return errorMap;
+
+			Task task = userService.addRemark(remark, taskIdentifier);
+			return new ResponseEntity<Task>(task, HttpStatus.OK);
 		}
+		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
+	}
+
 	/**
 	 * This controller is used for calling add remark method from client service.
 	 * Will also be used for retrieving all the errors from input remark object.
+	 * 
 	 * @param remarkIdentifier is the object of Remark to be saved
-	 * @param taskIdentifier is the unique task identifier.
-	 * @return saved remark if no errors found or map of the errors found in the input remark object.
-	 */	
+	 * @param taskIdentifier   is the unique task identifier.
+	 * @return saved remark if no errors found or map of the errors found in the
+	 *         input remark object.
+	 */
 	@DeleteMapping("/remark/{taskIdentifier}/{remarkIdentifier}")
-		public ResponseEntity<?> removeRemark(@PathVariable String remarkIdentifier, @PathVariable String taskIdentifier, HttpSession session){
-			if (session.getAttribute("loginName") != null) {					
-				userService.removeRemark(remarkIdentifier,taskIdentifier);
-				return new ResponseEntity<String>("Remark deleted successfully", HttpStatus.OK);
-			}
-			return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
+	public ResponseEntity<?> removeRemark(@PathVariable String remarkIdentifier, @PathVariable String taskIdentifier,
+			HttpSession session) {
+		if (session.getAttribute("loginName") != null) {
+			userService.removeRemark(remarkIdentifier, taskIdentifier);
+			return new ResponseEntity<String>("Remark deleted successfully", HttpStatus.OK);
 		}
-	/* |-------------------------------------------------| END |--------------------------------------------------------------| */
-
-
-
-
-	
+		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
+	}
+	/*
+	 * |-------------------------------------------------| END
+	 * |--------------------------------------------------------------|
+	 */
 
 }

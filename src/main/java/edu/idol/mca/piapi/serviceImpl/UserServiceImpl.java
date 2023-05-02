@@ -443,5 +443,21 @@ public class UserServiceImpl implements UserService {
 		return savedTask;
 	}
 
+	@Override
+	public User getDeveloperByTaskIdentifier(String taskIdentifier, HttpSession session) {
+		Task task = taskRepository.findByTaskIdentifier(taskIdentifier);
+		if (task == null) {
+			throw new TaskIdException("Task with Identifier " + taskIdentifier.toUpperCase() + " doesn't exist");
+		}
+		User assignedDeveloper = new User();
+		Set<User> users= task.getUsers();	
+		for (User user : users) {
+			if(user.getUserType().equals("Developer")) {
+				assignedDeveloper=user;
+			}
+		}
+		return assignedDeveloper;
+	}
+
 	// ******************************************************************************************************************************************************************
 }
