@@ -412,6 +412,29 @@ public class UserController {
 		}
 		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
 	}
+	
+	
+	/**
+	 * This method is method is used to assign task to developer
+	 * 
+	 * @param taskIdentifier
+	 * @param loginName
+	 * @param session
+	 * @return Resposne Entity with Task assigned to developer if Team Leader is
+	 *         logged in else You do not have Access message is appeared with
+	 *         HttpStatus
+	 */
+	@PatchMapping("/task/assignClient/{taskIdentifier}/{loginName}")
+	public ResponseEntity<?> assignClientToTask(@PathVariable String taskIdentifier, @PathVariable String loginName,
+			HttpSession session) {
+		if (session.getAttribute("userType") != null) {
+			Task savedTask = userService.assignClient(taskIdentifier, loginName);
+			return new ResponseEntity<Task>(savedTask, HttpStatus.CREATED);
+		}
+		return new ResponseEntity<String>("You do not have Access!!!", HttpStatus.UNAUTHORIZED);
+	}
+	
+	
 
 	/**
 	 * Method to find the assigned Developer by taskIdentifier

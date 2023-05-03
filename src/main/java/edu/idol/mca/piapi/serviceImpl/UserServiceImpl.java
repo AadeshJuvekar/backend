@@ -265,6 +265,43 @@ public class UserServiceImpl implements UserService {
 
 	// ------------------------------------------------------- USERTYPE : CLIENT
 	// OPERATIONS
+
+	@Override
+	public Task assignClient(String taskIdentifier, String loginName) {
+		// get developer
+		User client = userRepository.findByLoginName(loginName);
+		// check if available or not
+		// throw exception not found
+		if (client == null) {
+			throw new UserNotFoundException("Developer with Identifier " + loginName + " doesn't exist");
+		}
+		Task task = taskRepository.findByTaskIdentifier(taskIdentifier);
+		if (task == null) {
+			throw new TaskIdException("Task with Identifier " + taskIdentifier.toUpperCase() + " doesn't exist");
+		}
+//				Set<Task> developerTaskList = developer.getAssignedTasks();
+		Set<User> assignedUsers = task.getUsers();
+
+		for (Iterator<User> iterator = assignedUsers.iterator(); iterator.hasNext();) {
+			if (iterator.next() != null) {
+				if (iterator.hasNext()) {
+					User oldDeveloper = iterator.next();
+					if (oldDeveloper.getLoginName().equals(client.getLoginName())) {
+						throw new UserAlreadyExistException("Developer with loginName " + loginName + " already exist");
+					}
+					if (oldDeveloper.getUserType().equals("Developer")) {
+						task.removeUser(oldDeveloper);
+					}
+				}
+			}
+		}
+		task.addUser(client);
+		userRepository.save(client);
+//				task.setUsers(assignedUsers);
+
+		return taskRepository.save(task);
+	}
+
 	// -------------------------------------------------------------------------------------
 	@Override
 	public User addUser(String taskIdentifier, String loginName) {
@@ -386,28 +423,21 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void removeRemark(String remarkIdentifier, String taskIdentifier) {
 		/*
-		 if (taskIdentifier == null || remarkIdentifier == null) {
-			throw new NullPointerException("Please Fill the Required Fields");
-		}
-		Task task = taskRepository.findByTaskIdentifier(taskIdentifier);
-		Remark remark = remarkRepository.findByRemarkIdentifier(remarkIdentifier);
-		if (task.getTaskIdentifier() == null) {
-			throw new TaskIdException("Task with Identifier" + taskIdentifier.toUpperCase() + " doesn't exist");
-		}
-		if (remark.getRemarkIdentifier() == null) {
-			throw new TaskIdException("Remark with Identifier" + remarkIdentifier.toUpperCase() + " doesn't exist");
-		}
-		remark.setTask(null);
-
-		Set<Remark> remarkList = new HashSet<>();
-		if (task.getRemarks() != null) {
-			remarkList = task.getRemarks();
-		}
-		remarkList.remove(remark);
-		remarkRepository.delete(remark);
-		task.setRemarks(remarkList);
-		taskRepository.save(task);
-		*/
+		 * if (taskIdentifier == null || remarkIdentifier == null) { throw new
+		 * NullPointerException("Please Fill the Required Fields"); } Task task =
+		 * taskRepository.findByTaskIdentifier(taskIdentifier); Remark remark =
+		 * remarkRepository.findByRemarkIdentifier(remarkIdentifier); if
+		 * (task.getTaskIdentifier() == null) { throw new
+		 * TaskIdException("Task with Identifier" + taskIdentifier.toUpperCase() +
+		 * " doesn't exist"); } if (remark.getRemarkIdentifier() == null) { throw new
+		 * TaskIdException("Remark with Identifier" + remarkIdentifier.toUpperCase() +
+		 * " doesn't exist"); } remark.setTask(null);
+		 * 
+		 * Set<Remark> remarkList = new HashSet<>(); if (task.getRemarks() != null) {
+		 * remarkList = task.getRemarks(); } remarkList.remove(remark);
+		 * remarkRepository.delete(remark); task.setRemarks(remarkList);
+		 * taskRepository.save(task);
+		 */
 	}
 
 	@Override
@@ -450,10 +480,10 @@ public class UserServiceImpl implements UserService {
 			throw new TaskIdException("Task with Identifier " + taskIdentifier.toUpperCase() + " doesn't exist");
 		}
 		User assignedDeveloper = new User();
-		Set<User> users= task.getUsers();	
+		Set<User> users = task.getUsers();
 		for (User user : users) {
-			if(user.getUserType().equals("Developer")) {
-				assignedDeveloper=user;
+			if (user.getUserType().equals("Developer")) {
+				assignedDeveloper = user;
 			}
 		}
 		return assignedDeveloper;

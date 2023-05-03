@@ -139,5 +139,7 @@ public interface UserService {
 	public void removeRemark(String remarkIdentifier, String taskIdentifier);
 	
 	public User getDeveloperByTaskIdentifier(String taskIdentifier, HttpSession session);
+	
+	public Task assignClient(String taskIdentifier, String loginName);
 
 }
